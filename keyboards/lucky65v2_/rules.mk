@@ -27,9 +27,13 @@ RGB_MATRIX_ENABLE = yes        # RGB matrix
 RGB_MATRIX_BLINK_ENABLE = yes  # RGB matrix blink
 HAPTIC_ENABLE = no             # Haptic
 MULTIMODE_ENABLE = yes         # three mode
+RGB_MATRIX_KEYREACTIVE_ENABLED = yes
 
 EEPROM_DRIVER = wear_leveling
 WEAR_LEVELING_DRIVER = spi_flash
+
+RGB_MATRIX_CUSTOM_USER = yes
+RGB_MATRIX_CUSTOM_MY_EFFECT = my_cool_effect
 
 ifeq ($(strip $(MULTIMODE_ENABLE)), yes)
     MULTIMODE_DRIVER = uart3

@@ -200,6 +200,15 @@ void rgb_matrix_set_color(int index, uint8_t red, uint8_t green, uint8_t blue) {
     rgb_matrix_driver.set_color(index, red, green, blue);
 }
 
+void rgb_matrix_get_color(int index, uint8_t* red, uint8_t* green, uint8_t* blue) {
+
+    if (index >= RGB_MATRIX_LED_COUNT) {
+        return;
+    }
+
+    rgb_matrix_driver.get_color(index, red, green, blue);
+}
+
 void rgb_matrix_set_color_all(uint8_t red, uint8_t green, uint8_t blue) {
 #if defined(RGB_MATRIX_ENABLE) && defined(RGB_MATRIX_SPLIT)
     for (uint8_t i = 0; i < RGB_MATRIX_LED_COUNT; i++)
@@ -210,6 +219,7 @@ void rgb_matrix_set_color_all(uint8_t red, uint8_t green, uint8_t blue) {
 }
 
 void process_rgb_matrix(uint8_t row, uint8_t col, bool pressed) {
+    static bool first_time = true;
 #ifndef RGB_MATRIX_SPLIT
     if (!is_keyboard_master()) return;
 #endif
@@ -224,10 +234,15 @@ void process_rgb_matrix(uint8_t row, uint8_t col, bool pressed) {
 #    if defined(RGB_MATRIX_KEYRELEASES)
     if (!pressed)
 #    elif defined(RGB_MATRIX_KEYPRESSES)
-    if (pressed)
+    if (pressed && !fast_lane)
 #    endif // defined(RGB_MATRIX_KEYRELEASES)
     {
         led_count = rgb_matrix_map_row_column_to_led(row, col, led);
+        first_time = true;
+    }
+    else if (pressed && fast_lane && first_time){
+        led_count = rgb_matrix_map_row_column_to_led(row, col, led);
+        first_time = false;
     }
 
     if (last_hit_buffer.count + led_count > LED_HITS_TO_REMEMBER) {
@@ -759,4 +774,11 @@ void rgb_matrix_set_flags(led_flags_t flags) {
 
 void rgb_matrix_set_flags_noeeprom(led_flags_t flags) {
     rgb_matrix_set_flags_eeprom_helper(flags, false);
+}
+
+uint32_t rgb_matrix_get_timer_buffer(void) {
+    return rgb_timer_buffer;
+}
+void rgb_matrix_set_timer_buffer(uint32_t t) {
+    rgb_timer_buffer = t;
 }

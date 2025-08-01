@@ -1,5 +1,9 @@
 VIA_ENABLE = yes
 ENCODER_MAP_ENABLE = yes
+CONSOLE_ENABLE = yes
+LEADER_ENABLE = yes
+RGB_MATRIX_ENABLE        = yes
+RGB_MATRIX_CUSTOM_USER   = yes
 
 ifeq ($(strip $(CONSOLE_ENABLE)), yes)
     KEYBOARD_SHARED_EP := yes

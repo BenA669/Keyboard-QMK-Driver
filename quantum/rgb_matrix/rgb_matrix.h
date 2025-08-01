@@ -119,6 +119,7 @@ void eeconfig_update_rgb_matrix(void);
 uint8_t rgb_matrix_map_row_column_to_led_kb(uint8_t row, uint8_t column, uint8_t *led_i);
 uint8_t rgb_matrix_map_row_column_to_led(uint8_t row, uint8_t column, uint8_t *led_i);
 
+void rgb_matrix_get_color(int index, uint8_t* red, uint8_t* green, uint8_t* blue);
 void rgb_matrix_set_color(int index, uint8_t red, uint8_t green, uint8_t blue);
 void rgb_matrix_set_color_all(uint8_t red, uint8_t green, uint8_t blue);
 
@@ -238,6 +239,11 @@ typedef struct {
     void (*set_color_all)(uint8_t r, uint8_t g, uint8_t b);
     /* Flush any buffered changes to the hardware. */
     void (*flush)(void);
+
+    #ifdef RGB_MATRIX_DRIVER_GET_COLOR_ENABLE
+        void (*get_color)(int index, uint8_t* r, uint8_t* g, uint8_t* b);
+    #endif
+
 } rgb_matrix_driver_t;
 
 static inline bool rgb_matrix_check_finished_leds(uint8_t led_idx) {
@@ -264,3 +270,7 @@ extern last_hit_t g_last_hit_tracker;
 #ifdef RGB_MATRIX_FRAMEBUFFER_EFFECTS
 extern uint8_t g_rgb_frame_buffer[MATRIX_ROWS][MATRIX_COLS];
 #endif
+
+// in rgb_matrix.h
+uint32_t rgb_matrix_get_timer_buffer(void);
+void     rgb_matrix_set_timer_buffer(uint32_t t);

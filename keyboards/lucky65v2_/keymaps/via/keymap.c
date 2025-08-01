@@ -4,16 +4,24 @@
 #include QMK_KEYBOARD_H
 #include "immobile.h"
 #include "color.h"
+#include "my_globals.h"
 
 uint8_t Shift_key_press = 0;
 uint8_t KC_GRV_key_Release_flag = 0;
+uint8_t fast_lane = 0;
 enum layers {
     _LB = 0,
     _LF,
     _LS,
-    _LM,
-    _LMF,
-    _LMS
+    // _LM,
+    // _LMF,
+    // _LMS,
+    fast
+};
+
+enum custom_keycodes {
+    KC_ALTTAB = SAFE_RANGE,
+    KC_CLEARD
 };
 
 #define RGB_HSV_MAX 7
@@ -36,46 +44,53 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [_LB] = LAYOUT( /* Base */
         KC_ESC,    KC_1,    KC_2,    KC_3,    KC_4,    KC_5,    KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    KC_MINS,    KC_EQL,    KC_BSPC,    KC_INS,KC_MUTE,
         KC_TAB,    KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,    KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_LBRC,    KC_RBRC,   KC_BSLS,    KC_DEL,
-        KC_CAPS,   KC_A,    KC_S,    KC_D,    KC_F,    KC_G,    KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, KC_QUOT,    KC_ENT,                KC_PGUP,
-        KC_LSFT,   KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,    KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, KC_RSFT,               KC_UP,      KC_PGDN,
+        TO(fast),   KC_A,    KC_S,    KC_D,    KC_F,    KC_G,    KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, KC_QUOT,    KC_ENT,                KC_HOME,
+        KC_LSFT,   KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,    KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, KC_RSFT,               KC_UP,      KC_END,
         KC_LCTL,   KC_LGUI, KC_LALT,                            KC_SPC,KC_SPC,KC_SPC,                        MO(_LF), KC_RCTL,    KC_LEFT,   KC_DOWN,    KC_RGHT),
 
     [ _LF] = LAYOUT( /* Base */
-        EE_CLR,    KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,   KC_F6,   KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11,  KC_F12,  RGB_TOG, _______,KC_MUTE,
-        TO(_LM),   IM_BT1,  IM_BT2,  IM_BT3,  IM_2G4,  IM_USB, _______,  _______, _______, _______, KC_PSCR, _______, _______, RGB_MOD, _______,
-        _______,   _______, _______, _______, _______, _______, KC_SCRL, KC_PAUS, KC_HOME, KC_END,  _______, _______, RGB_HUI,          _______,
+        EE_CLR,    KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,   KC_F6,   KC_MPRV,   KC_MPLY,   KC_MNXT,   KC_MUTE,  KC_VOLD,  KC_VOLU,  RGB_TOG, _______,KC_MUTE,
+        _______,   IM_BT1,  IM_BT2,  IM_BT3,  IM_2G4,  IM_USB, _______,  QK_RBT, _______, _______, KC_PSCR, _______, _______, RGB_MOD, _______,
+        KC_CAPS,   _______, _______, _______, _______, _______, KC_SCRL, KC_PAUS, KC_HOME, KC_END,  _______, _______, RGB_HUI,          _______,
         _______,   _______,  _______,  _______,  _______, _______, _______, _______, _______, _______, _______, _______,          RGB_VAI, _______,
         NUM_TOF1,   GU_TOGG, _______,                            IM_BATQ,IM_BATQ,IM_BATQ,                            _______, _______, RGB_SPD, RGB_VAD, RGB_SPI),
 
     [_LS] = LAYOUT( /* Base */
-        EE_CLR,    KC_MYCM, KC_MAIL, KC_WHOM, KC_CALC, KC_MSEL, KC_MSTP, KC_MPRV, KC_MPLY, KC_MNXT, KC_MUTE, KC_VOLD, KC_VOLU, RGB_TOG, _______,KC_MUTE,
-        TO(_LM),   IM_BT1,  IM_BT2,  IM_BT3,  IM_2G4,  IM_USB, _______,  _______, _______, _______, KC_PSCR, _______, _______, RGB_MOD, _______,
+        EE_CLR,    KC_F1,   KC_F2, KC_F3, KC_F4, KC_F5, KC_F6, KC_F7, KC_F8, KC_F9, KC_F10, KC_F11, KC_F12, RGB_TOG, _______,KC_MUTE,
+        _______,   IM_BT1,  IM_BT2,  IM_BT3,  IM_2G4,  IM_USB, _______,  _______, _______, _______, KC_PSCR, _______, _______, RGB_MOD, _______,
         _______,   _______, _______, _______, _______, _______, KC_SCRL, KC_PAUS, KC_HOME, KC_END,  _______, _______, RGB_HUI,          _______,
         _______,   _______,  _______,  _______,  _______, _______, _______, _______, _______, _______, _______, _______,          RGB_VAI, _______,
         NUM_TOF1,   GU_TOGG, _______,                            IM_BATQ,IM_BATQ,IM_BATQ,                            _______, _______, RGB_SPD, RGB_VAD, RGB_SPI),
 
 
 
-    [_LM] = LAYOUT(  /* Base */
-        KC_ESC,    KC_1,    KC_2,    KC_3,    KC_4,    KC_5,    KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    KC_MINS,    KC_EQL,    KC_BSPC,    KC_INS,KC_MUTE,
+    // [_LM] = LAYOUT(  /* Base */
+    //     KC_ESC,    KC_1,    KC_2,    KC_3,    KC_4,    KC_5,    KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    KC_MINS,    KC_EQL,    KC_BSPC,    KC_INS,KC_MUTE,
+    //     KC_TAB,    KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,    KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_LBRC,    KC_RBRC,   KC_BSLS,    KC_DEL,
+    //     KC_CAPS,   KC_A,    KC_S,    KC_D,    KC_F,    KC_G,    KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, KC_QUOT,    KC_ENT,                KC_PGUP,
+    //     KC_LSFT,   KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,    KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, KC_RSFT,               KC_UP,      KC_PGDN,
+    //     KC_LCTL,   KC_LALT, KC_LGUI,                            KC_SPC,KC_SPC,KC_SPC,                           MO(_LMF),KC_RCTL,    KC_LEFT,   KC_DOWN,    KC_RGHT),
+
+    // [_LMF] = LAYOUT(  /* FN */
+    //     EE_CLR,    KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,   KC_F6,   KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11,  KC_F12,  RGB_TOG, _______,KC_MUTE,
+    //     TO(_LB),   IM_BT1,  IM_BT2,  IM_BT3,  IM_2G4,  IM_USB, _______,  _______, _______, _______, KC_PSCR, _______, _______, RGB_MOD, _______,
+    //     _______,   _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, RGB_HUI,          _______,
+    //     _______,   _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,          RGB_VAI, _______,
+    //     NUM_TOF1,   _______, _______,                            IM_BATQ,IM_BATQ,IM_BATQ,                            _______, _______, RGB_SPD, RGB_VAD, RGB_SPI),
+
+    // [_LMS] = LAYOUT(  /* FN */
+    //     EE_CLR,    KC_BRIU, KC_BRID, _______, _______, _______, _______, KC_MPRV, KC_MPLY, KC_MNXT, KC_MUTE, KC_VOLD, KC_VOLU, RGB_TOG, _______,KC_MUTE,
+    //     TO(_LB),   IM_BT1,  IM_BT2,  IM_BT3,  IM_2G4,  IM_USB, _______,  _______, _______, _______, KC_PSCR, _______, _______, RGB_MOD, _______,
+    //     _______,   _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, RGB_HUI,          _______,
+    //     _______,   _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,          RGB_VAI, _______,
+    //     NUM_TOF1,   _______, _______,                            IM_BATQ,IM_BATQ,IM_BATQ,                            _______, _______, RGB_SPD, RGB_VAD, RGB_SPI),
+    
+    [fast] = LAYOUT( /* Base */
+        KC_ESC,    KC_GRV,    KC_2,    KC_3,    KC_4,    KC_5,    KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    KC_MINS,    KC_EQL,    KC_BSPC,    KC_INS,KC_MUTE,
         KC_TAB,    KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,    KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_LBRC,    KC_RBRC,   KC_BSLS,    KC_DEL,
-        KC_CAPS,   KC_A,    KC_S,    KC_D,    KC_F,    KC_G,    KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, KC_QUOT,    KC_ENT,                KC_PGUP,
-        KC_LSFT,   KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,    KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, KC_RSFT,               KC_UP,      KC_PGDN,
-        KC_LCTL,   KC_LALT, KC_LGUI,                            KC_SPC,KC_SPC,KC_SPC,                           MO(_LMF),KC_RCTL,    KC_LEFT,   KC_DOWN,    KC_RGHT),
-
-    [_LMF] = LAYOUT(  /* FN */
-        EE_CLR,    KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,   KC_F6,   KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11,  KC_F12,  RGB_TOG, _______,KC_MUTE,
-        TO(_LB),   IM_BT1,  IM_BT2,  IM_BT3,  IM_2G4,  IM_USB, _______,  _______, _______, _______, KC_PSCR, _______, _______, RGB_MOD, _______,
-        _______,   _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, RGB_HUI,          _______,
-        _______,   _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,          RGB_VAI, _______,
-        NUM_TOF1,   _______, _______,                            IM_BATQ,IM_BATQ,IM_BATQ,                            _______, _______, RGB_SPD, RGB_VAD, RGB_SPI),
-
-    [_LMS] = LAYOUT(  /* FN */
-        EE_CLR,    KC_BRIU, KC_BRID, _______, _______, _______, _______, KC_MPRV, KC_MPLY, KC_MNXT, KC_MUTE, KC_VOLD, KC_VOLU, RGB_TOG, _______,KC_MUTE,
-        TO(_LB),   IM_BT1,  IM_BT2,  IM_BT3,  IM_2G4,  IM_USB, _______,  _______, _______, _______, KC_PSCR, _______, _______, RGB_MOD, _______,
-        _______,   _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, RGB_HUI,          _______,
-        _______,   _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,          RGB_VAI, _______,
-        NUM_TOF1,   _______, _______,                            IM_BATQ,IM_BATQ,IM_BATQ,                            _______, _______, RGB_SPD, RGB_VAD, RGB_SPI),
+        TO(_LB),   KC_A,    KC_S,    KC_D,    KC_F,    KC_G,    KC_LEFT,    KC_DOWN,    KC_UP,    KC_RIGHT,    KC_SCLN, KC_QUOT,    KC_ENT,                KC_HOME,
+        KC_LSFT,   KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,    KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, KC_RSFT,               KC_UP,      KC_END,
+        KC_LCTL,   KC_LGUI, KC_ALTTAB,                            KC_SPC,KC_SPC,KC_SPC,                        MO(_LF), KC_RCTL,    KC_LEFT,   KC_DOWN,    KC_RGHT),
 
 };
 #ifdef ENCODER_MAP_ENABLE
@@ -85,8 +100,8 @@ const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][2] = {
     [1] = { ENCODER_CCW_CW(KC_VOLU, KC_VOLD)},
     [2] = { ENCODER_CCW_CW(KC_VOLU, KC_VOLD)},
     [3] = { ENCODER_CCW_CW(KC_VOLU, KC_VOLD)},
-    [4] = { ENCODER_CCW_CW(KC_VOLU, KC_VOLD)},
-    [5] = { ENCODER_CCW_CW(KC_VOLU, KC_VOLD)},
+    // [4] = { ENCODER_CCW_CW(KC_VOLU, KC_VOLD)},
+    // [5] = { ENCODER_CCW_CW(KC_VOLU, KC_VOLD)},
 };
 #endif
 
@@ -109,7 +124,7 @@ blink_rgb_t blink_rgbs[RGB_MATRIX_BLINK_COUNT] = {
 #ifndef MATRIX_LKEY_DISABLE
 im_lkey_t lkey_define_user[IM_LKEY_COUNT] = {
     {.keycode = TO(_LB), .hole_time = 3000}, // 参数：按键值，长按时间
-    {.keycode = TO(_LM), .hole_time = 3000}, // 参数：按键值，长按时间
+    // {.keycode = TO(_LM), .hole_time = 3000}, // 参数：按键值，长按时间
 };
 #endif
 
@@ -212,7 +227,7 @@ void eeconfig_confinfo_default(void) {
     confinfo.no_gui = false;
     confinfo.rgb_status = 0;
     confinfo.layer = _LB;
-    confinfo.rgb_hsv_index = 0;
+    confinfo.rgb_hsv_index = 2;
     confinfo.rgb_brightness = RGB_MATRIX_DEFAULT_VAL;
     confinfo.Num_To_F1 = 0;
     eeconfig_update_user(confinfo.raw);
@@ -311,7 +326,10 @@ void rgb_matrix_enable_user(void) {
     confinfo.rgb_status = 0;
     eeconfig_update_user(confinfo.raw);
     rgb_matrix_sethsv(rgb_matrix_get_hue(), rgb_matrix_get_sat(), confinfo.rgb_brightness);
+    dprintf("rgb_matrix_enable_user called\n");
 }
+
+
 
 bool im_mm_rgb_blink_hook_user(uint8_t index, mm_linker_rgb_t state) {
 
@@ -349,34 +367,98 @@ const uint8_t f1_12_keycode[]=
 volatile uint8_t Fn_key_press_Page = 0 ;
 bool im_process_record_user(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
-    case EE_CLR:
+    case KC_UP:
     {
-
-        if(record->event.pressed)
-        {
-            if((Fn_key_press_Page)&&(Shift_key_press))
-            {
-                unregister_code16(KC_RIGHT_SHIFT);
-                unregister_code16(KC_LEFT_SHIFT);
-
-                register_code16(KC_GRV);
-
-                KC_GRV_key_Release_flag =1;
+        if (record->event.pressed && (get_mods() & MOD_LSFT)){
+            if (biton32(layer_state) == fast){
+                unregister_code(KC_LSFT);
+                register_code(KC_PGUP);
+                register_code(KC_LSFT);
                 return false;
             }
         }
-        else
-        {
-            if(KC_GRV_key_Release_flag == 1)
-            {
-                unregister_code16(KC_GRV);
-                KC_GRV_key_Release_flag=0;
+        else {
+            return true;
+        }
+    }
+    break;
+    case KC_DOWN:
+    {
+        if (record->event.pressed && (get_mods() & MOD_LSFT)){
+            if (biton32(layer_state) == fast){
+                unregister_code(KC_LSFT);
+                register_code(KC_PGDN);
+                register_code(KC_LSFT);
                 return false;
             }
+        }
+        else {
+            return true;
+        }
+    }
+    break; 
+    case KC_ALTTAB:
+    {
+        if (record->event.pressed) {
+            // When pressed
+            register_code(KC_RALT);
+            tap_code(KC_TAB);
+        }
+        else {
+            /// When released
+            unregister_code(KC_RALT);
+        }
+        return false;
+    }
+    break; 
+    case KC_CLEARD:
+    {
+        if (record->event.pressed){
+
+        }
+    }
+    case TO(fast):
+        if (record->event.pressed) {
+            confinfo.layer = fast;
+            fast_lane = 1;
+            // if (confinfo.layer == fast) {
+            //     confinfo.layer = _LB;
+            //     fast_lane = 0;
+            // } else {
+            //     // rgb_matrix_mode_noeeprom(RGB_MATRIX_CUSTOM_num_light);
+            //     confinfo.layer = fast;
+            // }
         }
         return true;
+        break;
+    // case EE_CLR:
+    // {
 
-    }
+    //     if(record->event.pressed)
+    //     {
+    //         if((Fn_key_press_Page)&&(Shift_key_press))
+    //         {
+    //             unregister_code16(KC_RIGHT_SHIFT);
+    //             unregister_code16(KC_LEFT_SHIFT);
+
+    //             register_code16(KC_GRV);
+
+    //             KC_GRV_key_Release_flag =1;
+    //             return false;
+    //         }
+    //     }
+    //     else
+    //     {
+    //         if(KC_GRV_key_Release_flag == 1)
+    //         {
+    //             unregister_code16(KC_GRV);
+    //             KC_GRV_key_Release_flag=0;
+    //             return false;
+    //         }
+    //     }
+    //     return true;
+
+    // }
     break;
     case MO(_LF):
     {
@@ -389,25 +471,26 @@ bool im_process_record_user(uint16_t keycode, keyrecord_t *record) {
         {
             Fn_key_press_Page = 0;
             layer_move(confinfo.layer);
+            
         }
         return false;
     }
     break;
-    case MO(_LMF):
-    {
-        if (record->event.pressed)
-        {
-            Change_To_Layer_move_fun(3);
-            Fn_key_press_Page = 2;
-        }
-        else
-        {
-            Fn_key_press_Page = 0;
-            layer_move(confinfo.layer);
-        }
-        return false;
-    }
-    break;
+    // case MO(_LMF):
+    // {
+    //     if (record->event.pressed)
+    //     {
+    //         Change_To_Layer_move_fun(3);
+    //         Fn_key_press_Page = 2;
+    //     }
+    //     else
+    //     {
+    //         Fn_key_press_Page = 0;
+    //         layer_move(confinfo.layer);
+    //     }
+    //     return false;
+    // }
+    // break;
     case KC_RIGHT_SHIFT:
     case KC_LEFT_SHIFT:
     {
@@ -415,30 +498,30 @@ bool im_process_record_user(uint16_t keycode, keyrecord_t *record) {
         return true;
     }
     break;
-    case KC_ESC:{
+    // case KC_ESC:{
 
-            if (record->event.pressed)
-            {
-                if(Shift_key_press == 1 )
-                {
-                    register_code16(KC_GRV);
-                    KC_GRV_key_Release_flag =1;
-                     return false;
-                }
+    //         if (record->event.pressed)
+    //         {
+    //             if(Shift_key_press == 1 )
+    //             {
+    //                 register_code16(KC_GRV);
+    //                 KC_GRV_key_Release_flag =1;
+    //                  return false;
+    //             }
 
-            }
-            else
-            {
-                if(KC_GRV_key_Release_flag == 1){
-                    unregister_code16(KC_GRV);
-                    KC_GRV_key_Release_flag=0;
-                    return false;
-                }
+    //         }
+    //         else
+    //         {
+    //             if(KC_GRV_key_Release_flag == 1){
+    //                 unregister_code16(KC_GRV);
+    //                 KC_GRV_key_Release_flag=0;
+    //                 return false;
+    //             }
 
-            }
-        return true;
-    }
-    break;
+    //         }
+    //     return true;
+    // }
+    // break;
 
     case KC_1:
     case KC_2:
@@ -558,13 +641,14 @@ bool im_process_record_user(uint16_t keycode, keyrecord_t *record) {
         return false;
         break;
     case RGB_MOD: {
-        if(record->event.pressed){
-            if(rgb_matrix_get_mode() == 31) {
-                rgb_matrix_mode(33);
-                return false;
-            }
-        }
-        return true;
+        return false;
+        // if(record->event.pressed){
+        //     if(rgb_matrix_get_mode() == 31) {
+        //         rgb_matrix_mode(33);
+        //         return false;
+        //     }
+        // }
+        // return true;
     }break;
     case RGB_RMOD: {
         if(record->event.pressed){
@@ -581,9 +665,14 @@ bool im_process_record_user(uint16_t keycode, keyrecord_t *record) {
     }break;
 
     case TO(_LB):
-    case TO(_LM): {
-        return false;
-    }break;
+        if (record->event.pressed) {
+            confinfo.layer = _LB;
+            // rgb_matrix_mode_noeeprom(RGB_MATRIX_CUSTOM_better_splash);
+            fast_lane = 0;
+        }
+    // case TO(_LM): {
+    //     return false;
+    // }break;
     case US_TS1: { // 低频
         if (record->event.pressed) {
             bts_send_vendor(0x60);
@@ -631,47 +720,79 @@ bool im_lkey_process_user(uint16_t keycode, bool pressed) {
             }
             return false;
         } break;
-        case TO(_LM): {
-            if (pressed) {
-                rgb_matrix_blink_set_interval_times(IM_MM_RGB_BLINK_INDEX_W2M, 250, 3);
-                rgb_matrix_blink_set(IM_MM_RGB_BLINK_INDEX_W2M);
-                set_single_persistent_default_layer(_LM);
-                confinfo.layer = _LM;
-                confinfo.no_gui = false;
-                eeconfig_update_user(confinfo.raw);
+        // case TO(_LM): {
+        //     if (pressed) {
+        //         rgb_matrix_blink_set_interval_times(IM_MM_RGB_BLINK_INDEX_W2M, 250, 3);
+        //         rgb_matrix_blink_set(IM_MM_RGB_BLINK_INDEX_W2M);
+        //         set_single_persistent_default_layer(_LM);
+        //         confinfo.layer = _LM;
+        //         confinfo.no_gui = false;
+        //         eeconfig_update_user(confinfo.raw);
 
-            }
-            return false;
-        } break;
+        //     }
+        //     return false;
+        // } break;
 
     }
     return true;
 }
+
 #ifdef RGB_MATRIX_ENABLE
 
 #ifndef RGB_MATRIX_BAT_VAL
 #    define RGB_MATRIX_BAT_VAL R GB_MATRIX_MAXIMUM_BRIGHTNESS
 #endif
 
-bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
+// bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
 
 
-    if (host_keyboard_led_state().caps_lock) {
-        rgb_matrix_set_color(38, 0xff, 0xff, 0xff);
-    }
+//     if (host_keyboard_led_state().caps_lock) {
+//        rgb_matrix_set_color(12, 255, 255, 255);
+//     }
 
-    if ((!battery_chrg_flag) && (!full_flag)) {
-        if (bat_statue != BAT_CHRGING) bts_send_vendor(v_bat_charging);
-        rgb_matrix_set_color(RGB_MATRIX_BLINK_INDEX_BAT, RGB_BLUE);
-        chrg_flag = true;
-        bat_statue = BAT_CHRGING;
-    }
+//     if ((!battery_chrg_flag) && (!full_flag)) {
+//         if (bat_statue != BAT_CHRGING) bts_send_vendor(v_bat_charging);
+//         rgb_matrix_set_color(RGB_MATRIX_BLINK_INDEX_BAT, RGB_BLUE);
+//         chrg_flag = true;
+//         bat_statue = BAT_CHRGING;
+//     }
 
-    if (confinfo.no_gui)
-    {
-        rgb_matrix_set_color(4, 0xff, 0xff, 0xff);
+//     if (confinfo.no_gui)
+//     {
+//         rgb_matrix_set_color(4, 0xff, 0xff, 0xff);
 
-    }
-    return true;
+//     }
+//     return true;
+// }
+
+// bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
+//     for (uint8_t i = led_min; i < led_max / 2; i++) {
+//         switch(get_highest_layer(layer_state)) {
+//             case 2:
+//                 rgb_matrix_set_color(i, RGB_BLUE);
+//                 break;
+//             case 1:
+//                 rgb_matrix_set_color(i, RGB_YELLOW);
+//                 break;
+//             case 0:
+//                 rgb_matrix_set_color(i, RGB_GREEN);
+//                 break;
+//             default:
+//                 break;
+//         }
+//     }
+//     return false;
+// }
+
+// bool rgb_matrix_indicators_user(void) {
+//     if (host_keyboard_led_state().caps_lock) {
+//           // Make LED #12 white
+//     }
+//     return false;
+// }
+
+void keyboard_post_init_user(void) {
+    rgb_matrix_mode_noeeprom(RGB_MATRIX_CUSTOM_better_splash);
 }
+
 #endif
