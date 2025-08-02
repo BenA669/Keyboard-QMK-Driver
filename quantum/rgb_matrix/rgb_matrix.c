@@ -220,6 +220,19 @@ void rgb_matrix_set_color_all(uint8_t red, uint8_t green, uint8_t blue) {
 
 void process_rgb_matrix(uint8_t row, uint8_t col, bool pressed) {
     static bool first_time = true;
+    static uint8_t     splashkey[MATRIX_ROWS][MATRIX_COLS] = {0};
+    static bool init_done = false;
+    if (!init_done) {
+        splashkey[2][0]  = 1;
+        splashkey[4][0]  = 1;
+        splashkey[4][1]  = 1;
+        splashkey[4][3]  = 1;
+        splashkey[4][4]  = 1;
+        splashkey[4][5]  = 1;
+        init_done = true;
+    }
+
+
 #ifndef RGB_MATRIX_SPLIT
     if (!is_keyboard_master()) return;
 #endif
@@ -234,7 +247,7 @@ void process_rgb_matrix(uint8_t row, uint8_t col, bool pressed) {
 #    if defined(RGB_MATRIX_KEYRELEASES)
     if (!pressed)
 #    elif defined(RGB_MATRIX_KEYPRESSES)
-    if (pressed && !fast_lane)
+    if (pressed && !fast_lane && (splashkey[row][col] == 1))
 #    endif // defined(RGB_MATRIX_KEYRELEASES)
     {
         led_count = rgb_matrix_map_row_column_to_led(row, col, led);

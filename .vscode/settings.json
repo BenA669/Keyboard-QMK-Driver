@@ -33,5 +33,6 @@
     ],
     "terminal.integrated.defaultProfile.windows": "Ubuntu-20.04 (WSL)",
     "C_Cpp.intelliSenseEngineFallback": "enabled",
-    "C_Cpp.default.compilerPath": ""
+    "C_Cpp.default.compilerPath": "",
+    "C_Cpp.errorSquiggles": "disabled"
 }
